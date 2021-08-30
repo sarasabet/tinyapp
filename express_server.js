@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+const bodyParser = require("body-parser");
 
+app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
 
@@ -9,6 +11,22 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+// generate 6 digit random character
+ generateRandomString = () => {
+  const randomId = (Math.random() + 1).toString(36).substring(7);
+  return randomId;
+}
+
+//drive to urls/new pag, affter pushing submit btn the data will be posted 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send('ok');
+});
+
 // get short url from url , save it as a var  shorturl,
 // shorturl is the key on db, get the longurl with the key (shorturl,
 app.get("/urls/:shortURL", (req, res) => {
@@ -20,8 +38,7 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
-
-
+// shows all urls on db
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
