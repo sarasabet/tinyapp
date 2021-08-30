@@ -17,14 +17,24 @@ const urlDatabase = {
   return randomId;
 }
 
+
 //drive to urls/new pag, affter pushing submit btn the data will be posted 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send('ok');
+  const shortURL = generateRandomString();// generate a new id 
+  const longURL = req.body.longURL;// get the long urld from the form / body 
+  urlDatabase[shortURL] = longURL;// update db with new short/long urls
+  res.redirect(`/urls/${shortURL}`);//redirection to /urls/:shortURL, where shortURL is the random string we generated
+});
+
+
+app.get("/u/:shortURL", (req, res) => {
+  const shorturl = req.params.shortURL;// save the shorturl comming from the url bar 
+  const longURL = urlDatabase[shorturl] // lookup tthe value coresponding shorturl-key
+  res.redirect(longURL);// redirect to the related long url
 });
 
 // get short url from url , save it as a var  shorturl,
@@ -38,6 +48,8 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
+
 // shows all urls on db
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
