@@ -17,10 +17,24 @@ const urlDatabase = {
   return randomId;
 }
 
-//edit an existing longURL 
-//display /urls page 
-//edit 
-// app.get ('urls')
+
+//get /post routs for editing an existing url
+app.get ('/urls/:id' , (req, res) => {
+  
+  const shortURL = req.params.id;//get id/shortUrl from teh url bar
+  const longURL = urlDatabase[shortURL];// get associate lonngurl based on the key/id/shorturl
+  const templateVars = {
+    longURL:longURL, 
+    shortURL:shortURL
+  };
+  res.render('urls_show', templateVars);
+})
+app.post('/urls/:id', (req, res) => {
+
+  urlDatabase[req.params.id] = req.body.longURL;// get shorturl/id from url bar get the editted longUrl from browser and update the db
+  res.redirect('/urls');
+})
+
 
 
 
@@ -33,7 +47,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //drive to urls/new pag, affter pushing submit btn the data will be posted 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  res.redirect("urls_new");
 });
 
 app.post("/urls", (req, res) => {
