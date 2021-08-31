@@ -17,6 +17,19 @@ const urlDatabase = {
   return randomId;
 }
 
+//edit an existing longURL 
+//display /urls page 
+//edit 
+// app.get ('urls')
+
+
+
+// to delete specific url from db and redirect to /urls
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shorturl = req.params.shortURL
+  delete urlDatabase[shorturl]
+  res.redirect("/urls");
+})
 
 //drive to urls/new pag, affter pushing submit btn the data will be posted 
 app.get("/urls/new", (req, res) => {
