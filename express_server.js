@@ -11,16 +11,29 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+
 // generate 6 digit random character
  generateRandomString = () => {
   const randomId = (Math.random() + 1).toString(36).substring(7);
   return randomId;
 }
 
+//drive to urls/new pag, affter pushing submit btn the data will be posted 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
 
-//get /post routs for editing an existing url
+app.post("/urls/new", (req, res) => {
+  const shortURL = generateRandomString();// generate a new id 
+  const longURL = req.body.longURL;// get the long urld from the form / body 
+  urlDatabase[shortURL] = `http://${longURL}`;// update db with new short/long urls
+  console.log(shortURL, longURL, urlDatabase)
+  res.redirect("/urls");
+});
+
+//get post routs for editing an existing url
 app.get ('/urls/:id' , (req, res) => {
-  
+
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
   const longURL = urlDatabase[shortURL];// get associate lonngurl based on the key/id/shorturl
   const templateVars = {
@@ -35,27 +48,12 @@ app.post('/urls/:id', (req, res) => {
   res.redirect('/urls');
 })
 
-
-
-
 // to delete specific url from db and redirect to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shorturl = req.params.shortURL
-  delete urlDatabase[shorturl]
   res.redirect("/urls");
 })
 
-//drive to urls/new pag, affter pushing submit btn the data will be posted 
-app.get("/urls/new", (req, res) => {
-  res.redirect("urls_new");
-});
 
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();// generate a new id 
-  const longURL = req.body.longURL;// get the long urld from the form / body 
-  urlDatabase[shortURL] = longURL;// update db with new short/long urls
-  res.redirect(`/urls/${shortURL}`);//redirection to /urls/:shortURL, where shortURL is the random string we generated
-});
 
 
 app.get("/u/:shortURL", (req, res) => {
@@ -67,17 +65,17 @@ app.get("/u/:shortURL", (req, res) => {
 // get short url from url , save it as a var  shorturl,
 // shorturl is the key on db, get the longurl with the key (shorturl,
 app.get("/urls/:shortURL", (req, res) => {
-  const shorturl = req.params.shortURL; // to define shorturl to look it up in db
+  const shortURL = req.params.shortURL; // to define shorturl to look it up in db
+  const longURL = urlDatabase[shortURL] 
 
   const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[shorturl] 
+    shortURL, 
+    longURL:longURL, 
   };
   res.render("urls_show", templateVars);
 });
 
-
-// shows all urls on db
+// shows all urls on main page
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
