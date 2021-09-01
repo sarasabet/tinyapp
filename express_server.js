@@ -55,6 +55,12 @@ app.post("/register", (req, res) => {
   const email = req.body.email;// extract email from browser /register page 
   const password = req.body.password;// extract [password] from browser /register page 
   const id = generateRandomString();
+  if(getUserByEmail(usersDb, email)) {
+    res.send('Email exist, please login, or try again')
+  } else if (!email||email.length === 0 || password.length ===0) {
+    res.send("BAd Email/password. The request could not be completed")
+  } 
+  
   usersDb[id] = {//update users db with the newlly registered user
     id,
     email,
