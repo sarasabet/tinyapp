@@ -9,10 +9,10 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <div style="margin-left: 30em;">
+        <div style="margin-left: 65em;">
           <div>
             <% if(!user) {%>
-              <div style="margin-left: 20em;flex-direction: row;">
+              <div style="margin-left: 20em;">
                 <form class="form-inline" method="get" action="/login">
                   <label for="Login"></label>
                   <button type="submit" style="background-color:#28a745;border-radius: 12%;width: 150px;">Login</button>
@@ -26,7 +26,7 @@
               </div>
               <% } else {%>
 
-                <form style="margin-left: 10em;" action="/logout" method="POST">
+                <form style="margin-left: 10em;" action="/logout" method="POST" >
                   <label for="logOut">Loggedin As :<%= user.email %></label>
                   <button style="margin-left:2em ;margin-top: 1em;" type="submite" name="logOut">Loggout</button>
                 </form>
