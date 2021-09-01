@@ -17,14 +17,15 @@ const urlDatabase = {
 const usersDb = { 
   "userRandomID": {
     id: "userRandomID", 
-    email: "user@example.com", 
+    email: "u1@example.com", 
     password: "000"
   },
  "user2RandomID": {
     id: "user2RandomID", 
-    email: "user2@example.com", 
+    email: "u2@example.com", 
     password: "000"
-  }
+  },
+
 }
 
 // generate 6 digit random character
@@ -40,15 +41,14 @@ const getUserByEmail = (usersDb, email) => {
     }
   }
 }
-const authenticateUser = (usersDb, email, password) => {
-  if (email !== user.email || password !== user.password) {
-    return false;
-  }
-}
 
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
-  res.render("register");
+  user_id = req.cookies["user_id"];
+  const templateVars = {
+    user:usersDb[user_id],
+  };
+  res.render("register", templateVars);
 })
 
 app.post("/register", (req, res) => {
@@ -60,7 +60,7 @@ app.post("/register", (req, res) => {
   } else if (!email||email.length === 0 || password.length ===0) {
     res.send("BAd Email/password. The request could not be completed")
   } 
-  
+
   usersDb[id] = {//update users db with the newlly registered user
     id,
     email,
@@ -71,8 +71,12 @@ app.post("/register", (req, res) => {
 })
 // if user click on login btn drives the user to login page 
 app.get("/login", (req, res) => {
+  user_id = req.cookies["user_id"];
+  const templateVars = {
+    user:usersDb[user_id],
+  };
 
-  res.render("login");
+  res.render("login", templateVars);
 })
 
 app.post('/login', (req, res) => {
@@ -96,7 +100,7 @@ app.post('/logout', (req, res) => {
 
 //drive to urls/new pag, affter pushing submit btn the data will be posted 
 app.get("/urls/new", (req, res) => {
-  user_id: req.cookies["user_id"];
+  user_id = req.cookies["user_id"];
   const templateVars = {
     user: usersDb[user_id],
   };
@@ -132,6 +136,8 @@ app.post('/urls/:id', (req, res) => {
 
 // to delete specific url from db and redirect to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
   res.redirect("/urls");
 })
 
@@ -146,11 +152,11 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; // to define shorturl to look it up in db
   const longURL = urlDatabase[shortURL]
-
+  user_id = req.cookies["user_id"];
   const templateVars = {
     shortURL,
     longURL: longURL,
-    user_id: req.cookies["user_id"],
+    user:usersDb[user_id],
   };
   res.render("urls_show", templateVars);
 });
