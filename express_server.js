@@ -17,12 +17,12 @@ const urlDatabase = {
 const usersDb = { 
   "userRandomID": {
     id: "userRandomID", 
-    email: "u1@example.com", 
+    email: "1@gmail.com", 
     password: "000"
   },
  "user2RandomID": {
     id: "user2RandomID", 
-    email: "u2@example.com", 
+    email: "2@gmail.com", 
     password: "000"
   },
 
@@ -40,6 +40,7 @@ const getUserByEmail = (usersDb, email) => {
       return usersDb[userObj]
     }
   }
+  return false;
 }
 
 //get post to render the register page and extract data , drive user to main page /urls
@@ -55,12 +56,15 @@ app.post("/register", (req, res) => {
   const email = req.body.email;// extract email from browser /register page 
   const password = req.body.password;// extract [password] from browser /register page 
   const id = generateRandomString();
-  if(getUserByEmail(usersDb, email)) {
-    res.send('Email exist, please login, or try again')
-  } else if (!email||email.length === 0 || password.length ===0) {
-    res.send("BAd Email/password. The request could not be completed")
-  } 
 
+  const user = getUserByEmail(usersDb);
+  if (!email || !password ) {
+    return res.send("Emaill/password field can not be empty!")
+  }
+
+  if(user) {
+    res.send ("Email already exist")
+  }
   usersDb[id] = {//update users db with the newlly registered user
     id,
     email,
@@ -84,9 +88,13 @@ app.post('/login', (req, res) => {
   const password = req.body.password
   const user = getUserByEmail(usersDb, email);
 
+  if (!email || !password) {
+    return res.send("Emial/password field can not be empty!")
+  }
   if (user.email !== email || user.password !== password) {
     return res.send('Email or password is not match!')
   };
+
   const user_id = user.id;
   res.cookie('user_id', user_id);
   res.redirect("/urls");
