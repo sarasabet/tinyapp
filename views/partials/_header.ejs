@@ -9,8 +9,8 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <div>
-          <div>
+        <div style="margin-left: 30em;">
+          <div >
             <% if(!username) {%>
               <form class="form-inline" action="/login" method="POST">
                 <div>
@@ -23,9 +23,9 @@
               </form>
               <% } else {%>
 
-                <form action="/logout" method="POST">
-                  <label for="logOut">Loggedin As : <%= username %></label>
-                  <button type="submite" name="logOut">Loggout</button>
+                <form  style="margin-left: 10em;" action="/logout" method="POST">
+                  <label for="logOut">Loggedin As :<%= username %></label>
+                  <button style="margin-left:2em ;margin-top: 1em;" type="submite" name="logOut">Loggout</button>
                 </form>
                 <%}%>
           </div>
