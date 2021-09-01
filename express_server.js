@@ -8,11 +8,17 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
-
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
+
 
 const usersDb = { 
   "userRandomID": {
@@ -109,6 +115,9 @@ app.post('/logout', (req, res) => {
 //drive to urls/new pag, affter pushing submit btn the data will be posted 
 app.get("/urls/new", (req, res) => {
   user_id = req.cookies["user_id"];
+  if (!user_id) {// if user is not logged in , tthe cookie is undefines , display the login page
+    return res.redirect("/login");    
+  }
   const templateVars = {
     user: usersDb[user_id],
   };
@@ -118,7 +127,11 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls/new", (req, res) => {
   const shortURL = generateRandomString();// generate a new id 
   const longURL = req.body.longURL;// get the long urld from the form / body 
-  urlDatabase[shortURL] = `http://${longURL}`;// update db with new short/long urls
+  const user_id = req.cookies["user_id"]
+  urlDatabase[shortURL] = {
+    longURL:`http://${longURL}`,// update db with new short/long urls
+    userID: user_id,
+};  
   res.redirect("/urls");
 });
 
@@ -126,7 +139,7 @@ app.post("/urls/new", (req, res) => {
 app.get('/urls/:id', (req, res) => {
 
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
-  const longURL = urlDatabase[shortURL];// get associate lonngurl based on the key/id/shorturl
+  const longURL = urlDatabase[shortURL].longURL;// get associate lonngurl based on the key/id/shorturl
   user_id = req.cookies["user_id"];
   const templateVars = {
     longURL: longURL,
@@ -138,7 +151,7 @@ app.get('/urls/:id', (req, res) => {
 })
 app.post('/urls/:id', (req, res) => {
 
-  urlDatabase[req.params.id] = req.body.longURL;// get shorturl/id from url bar get the editted longUrl from browser and update the db
+  urlDatabase[req.params.id].longURL = req.body.longURL;// get shorturl/id from url bar get the editted longUrl from browser and update the db
   res.redirect('/urls');
 })
 
@@ -151,21 +164,22 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shorturl = req.params.shortURL;// save the shorturl comming from the url bar 
-  const longURL = urlDatabase[shorturl] // lookup tthe value coresponding shorturl-key
+  const longURL = urlDatabase[shorturl].longURL // lookup tthe value coresponding shorturl-key
   res.redirect(longURL);// redirect to the related long url
 });
 
 // get short url from url , save it as a var  shorturl,
-// shorturl is the key on db, get the longurl with the key (shorturl,
+// shorturl is the key in db, get the longurl with the key (shorturl,
 app.get("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL; // to define shorturl to look it up in db
-  const longURL = urlDatabase[shortURL]
+  const shortURL = req.params.shortURL; // to define 
+  const longURL = urlDatabase[shortURL].longURL
   user_id = req.cookies["user_id"];
   const templateVars = {
     shortURL,
     longURL: longURL,
     user:usersDb[user_id],
   };
+  console.log(templateVars)
   res.render("urls_show", templateVars);
 });
 
