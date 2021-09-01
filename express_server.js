@@ -14,37 +14,85 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+const usersDb = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "000"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "000"
+  }
+}
 
 // generate 6 digit random character
 generateRandomString = () => {
   const randomId = (Math.random() + 1).toString(36).substring(7);
   return randomId;
+};
+
+const getUserByEmail = (usersDb, email) => {
+  for (const userObj in usersDb) {
+    if(usersDb[userObj].email === email) {
+      return usersDb[userObj]
+    }
+  }
+}
+const authenticateUser = (usersDb, email, password) => {
+  if (email !== user.email || password !== user.password) {
+    return false;
+  }
 }
 
-app.get('/register', (req, res) => {
-  const templateVars = {
-    username: req.cookies["username"],
+//get post to render the register page and extract data , drive user to main page /urls
+app.get("/register", (req, res) => {
+  res.render("register");
+})
+
+app.post("/register", (req, res) => {
+  const email = req.body.email;// extract email from browser /register page 
+  const password = req.body.password;// extract [password] from browser /register page 
+  const id = generateRandomString();
+  usersDb[id] = {//update users db with the newlly registered user
+    id,
+    email,
+    password,
   };
-  res.render("register", templateVars);
+  res.cookie("user_id", id);// set user cookie, id as user_id cookie
+  res.redirect('/urls',);
+})
+// if user click on login btn drives the user to login page 
+app.get("/login", (req, res) => {
+
+  res.render("login");
 })
 
 app.post('/login', (req, res) => {
-  const username = req.body.Login; // get user name from browser login btn/form 
-  res.cookie('username', username);// set the cookie 
+  const email = req.body.email; // get user name from browser login btn/form 
+  const password = req.body.password
+  const user = getUserByEmail(usersDb, email);
+
+  if (user.email !== email || user.password !== password) {
+    return res.send('Email or password is not match!')
+  };
+  const user_id = user.id;
+  res.cookie('user_id', user_id);
   res.redirect("/urls");
 })
 
 app.post('/logout', (req, res) => {
-  const username = req.cookies["username"];
-  console.log(username)
-  res.clearCookie('username');// delet the cookie from browser
+  const user_id = req.cookies["user_id"];
+  res.clearCookie('user_id');// delet the cookie from browser
   res.redirect('/urls')
 })
 
 //drive to urls/new pag, affter pushing submit btn the data will be posted 
 app.get("/urls/new", (req, res) => {
+  user_id: req.cookies["user_id"];
   const templateVars = {
-    username: req.cookies["username"],
+    user: usersDb[user_id],
   };
   res.render("urls_new", templateVars);
 });
@@ -61,10 +109,11 @@ app.get('/urls/:id', (req, res) => {
 
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
   const longURL = urlDatabase[shortURL];// get associate lonngurl based on the key/id/shorturl
+  user_id = req.cookies["user_id"];
   const templateVars = {
     longURL: longURL,
     shortURL: shortURL,
-    username: req.cookies["username"],
+    user:usersDb[user_id],
   };
 
   res.render('urls_show', templateVars);
@@ -95,16 +144,17 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL,
     longURL: longURL,
-    username: req.cookies["username"],
+    user_id: req.cookies["user_id"],
   };
   res.render("urls_show", templateVars);
 });
 
 // shows all urls on main page
 app.get("/urls", (req, res) => {
+  user_id = req.cookies["user_id"];
 
   const templateVars = {
-    username: req.cookies["username"],
+    user:usersDb[user_id],
     urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
@@ -119,7 +169,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(usersDb);
 });
 
 app.get("/set", (req, res) => {
