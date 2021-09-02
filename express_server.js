@@ -11,7 +11,7 @@ app.set("view engine", "ejs");
 const urlDatabase = {
   b6UTxQ: {
       longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
+      userID: "xJ48lW"
   },
   i3BoGr: {
       longURL: "https://www.google.ca",
@@ -21,13 +21,13 @@ const urlDatabase = {
 
 
 const usersDb = { 
-  "userRandomID": {
-    id: "userRandomID", 
+  "xJ48lW": {
+    id: "xJ48lW", 
     email: "1@gmail.com", 
     password: "000"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
+ "aJ48lW": {
+    id: "aJ48lW", 
     email: "2@gmail.com", 
     password: "000"
   },
@@ -49,6 +49,15 @@ const getUserByEmail = (usersDb, email) => {
   return false;
 }
 
+const urlsForUser = (urlDatabase, id) => {
+  for (const url in urlDatabase){
+    let userID = urlDatabase[url].userID
+    if (userID === id) {
+      return userID;
+    }
+  }
+  return false;
+}
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
   user_id = req.cookies["user_id"];
@@ -150,17 +159,29 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 })
 app.post('/urls/:id', (req, res) => {
+  const user = usersDb[req.cookies["user_id"]];
+  const shortURL = req.params.id;
 
-  urlDatabase[req.params.id].longURL = req.body.longURL;// get shorturl/id from url bar get the editted longUrl from browser and update the db
+  if (!user || urlDatabase[shortURL].userID !== user.id ){
+    return res.send('Unauthorized action' );
+  }   
+  urlDatabase[req.params.id].longURL = req.body.longURL;// get shorturl/id from url bar & editted longUrl from browser and update the db
   res.redirect('/urls');
 })
 
 // to delete specific url from db and redirect to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const user = usersDb[req.cookies["user_id"]];
   const shortURL = req.params.shortURL;
+
+  if (!user || urlDatabase[shortURL].userID !== user.id ){
+    return res.send('Unauthorized action' );
+  }
+   
   delete urlDatabase[shortURL];
-  res.redirect("/urls");
-})
+  res.redirect('/urls');
+
+});
 
 app.get("/u/:shortURL", (req, res) => {
   const shorturl = req.params.shortURL;// save the shorturl comming from the url bar 
@@ -174,22 +195,27 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; // to define 
   const longURL = urlDatabase[shortURL].longURL
   user_id = req.cookies["user_id"];
+
+  
   const templateVars = {
     shortURL,
     longURL: longURL,
     user:usersDb[user_id],
   };
-  console.log(templateVars)
   res.render("urls_show", templateVars);
 });
 
 // shows all urls on main page
 app.get("/urls", (req, res) => {
   user_id = req.cookies["user_id"];
-
+  if (!user_id) {
+    return res.redirect ('/login')
+  }
+  const userID = urlsForUser(urlDatabase,  user_id)
   const templateVars = {
     user:usersDb[user_id],
     urls: urlDatabase,
+    userID,
   };
   res.render("urls_index", templateVars);
 });
