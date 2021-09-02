@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 var cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const {generateRandomString, getUserByEmail, urlsForUser } = require("./helpers");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -42,31 +43,6 @@ const usersDb = {
 
 }
 
-// generate 6 digit random character
-generateRandomString = () => {
-  const randomId = (Math.random() + 1).toString(36).substring(7);
-  return randomId;
-};
-
-const getUserByEmail = (usersDb, email) => {
-  for (const userObj in usersDb) {
-    if(usersDb[userObj].email === email) {
-      return usersDb[userObj]
-    }
-  }
-  return false;
-}
-
-const urlsForUser = (urlDatabase, user, shortURL) => {
-
-  let userID = urlDatabase[shortURL].userID
-  if (userID === user.id) {
-    return true; 
-  } else {
-    return false;
-  }
-  
-}
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
   const user_id = req.session["user_id"];
@@ -81,7 +57,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password
   const id = generateRandomString();
 
-  const user = getUserByEmail(usersDb);
+  const user = getUserByEmail(usersDb, email);
   if (!email || !password ) {
     return res.send("Emaill/password field can not be empty!")
   }
