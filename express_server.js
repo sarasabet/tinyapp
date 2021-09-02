@@ -11,7 +11,6 @@ const {generateRandomString, getUserByEmail, urlsForUser } = require("./helpers"
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieParser());
-
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
