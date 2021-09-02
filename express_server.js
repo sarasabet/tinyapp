@@ -49,14 +49,15 @@ const getUserByEmail = (usersDb, email) => {
   return false;
 }
 
-const urlsForUser = (urlDatabase, id) => {
-  for (const url in urlDatabase){
-    let userID = urlDatabase[url].userID
-    if (userID === id) {
-      return userID;
-    }
+const urlsForUser = (urlDatabase, user, shortURL) => {
+
+  let userID = urlDatabase[shortURL].userID
+  if (userID === user.id) {
+    return true; 
+  } else {
+    return false;
   }
-  return false;
+  
 }
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
@@ -159,24 +160,27 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 })
 app.post('/urls/:id', (req, res) => {
-  const user = usersDb[req.cookies["user_id"]];
+  const user_id = req.cookies["user_id"];
+  const user =usersDb[user_id]
   const shortURL = req.params.id;
 
-  if (!user || urlDatabase[shortURL].userID !== user.id ){
-    return res.send('Unauthorized action' );
-  }   
+  if(!urlsForUser(urlDatabase, user, shortURL)) {
+    return res.send('Unauthorized action' )
+  };
+ 
   urlDatabase[req.params.id].longURL = req.body.longURL;// get shorturl/id from url bar & editted longUrl from browser and update the db
   res.redirect('/urls');
 })
 
 // to delete specific url from db and redirect to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const user = usersDb[req.cookies["user_id"]];
+  const user_id = req.cookies["user_id"];
+  const user =usersDb[user_id]
   const shortURL = req.params.shortURL;
 
-  if (!user || urlDatabase[shortURL].userID !== user.id ){
-    return res.send('Unauthorized action' );
-  }
+  if(!urlsForUser(urlDatabase, user, shortURL)) {
+    return res.send('Unauthorized action' )
+  };
    
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -195,13 +199,13 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; // to define 
   const longURL = urlDatabase[shortURL].longURL
   user_id = req.cookies["user_id"];
-
   
   const templateVars = {
     shortURL,
     longURL: longURL,
     user:usersDb[user_id],
   };
+  
   res.render("urls_show", templateVars);
 });
 
@@ -211,11 +215,11 @@ app.get("/urls", (req, res) => {
   if (!user_id) {
     return res.redirect ('/login')
   }
-  const userID = urlsForUser(urlDatabase,  user_id)
+
   const templateVars = {
     user:usersDb[user_id],
     urls: urlDatabase,
-    userID,
+
   };
   res.render("urls_index", templateVars);
 });
