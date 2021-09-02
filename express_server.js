@@ -4,7 +4,8 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser')
 app.use(cookieParser())
-
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
@@ -24,12 +25,12 @@ const usersDb = {
   "xJ48lW": {
     id: "xJ48lW", 
     email: "1@gmail.com", 
-    password: "000"
+    password: "$2b$10$chU0Eqy0Ho.noGFacMU/r.WOUDd5iao4oRcnScutP/lbRyWF8PpNq"// actual pass 000
   },
  "aJ48lW": {
     id: "aJ48lW", 
     email: "2@gmail.com", 
-    password: "000"
+    password: "$2b$10$chU0Eqy0Ho.noGFacMU/r.WOUDd5iao4oRcnScutP/lbRyWF8PpNq"// actual pass 000
   },
 
 }
@@ -70,7 +71,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const email = req.body.email;// extract email from browser /register page 
-  const password = req.body.password;// extract [password] from browser /register page 
+  const password = req.body.password
   const id = generateRandomString();
 
   const user = getUserByEmail(usersDb);
@@ -81,14 +82,17 @@ app.post("/register", (req, res) => {
   if(user) {
     res.send ("Email already exist")
   }
+  
   usersDb[id] = {//update users db with the newlly registered user
     id,
     email,
-    password,
+    password: bcrypt.hashSync(password, saltRounds)
   };
+  
   res.cookie("user_id", id);// set user cookie, id as user_id cookie
   res.redirect('/urls',);
 })
+
 // if user click on login btn drives the user to login page 
 app.get("/login", (req, res) => {
   user_id = req.cookies["user_id"];
@@ -102,14 +106,15 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email; // get user name from browser login btn/form 
   const password = req.body.password
-  const user = getUserByEmail(usersDb, email);
-
+  const user = getUserByEmail(usersDb, email);// get user by email from DB
   if (!email || !password) {
     return res.send("Emial/password field can not be empty!")
   }
-  if (user.email !== email || user.password !== password) {
+  if (user.email !== email || !bcrypt.compareSync(password, user.password)) {
+    
     return res.send('Email or password is not match!')
   };
+
 
   const user_id = user.id;
   res.cookie('user_id', user_id);
@@ -138,6 +143,7 @@ app.post("/urls/new", (req, res) => {
   const shortURL = generateRandomString();// generate a new id 
   const longURL = req.body.longURL;// get the long urld from the form / body 
   const user_id = req.cookies["user_id"]
+  
   urlDatabase[shortURL] = {
     longURL:`http://${longURL}`,// update db with new short/long urls
     userID: user_id,
@@ -165,10 +171,10 @@ app.post('/urls/:id', (req, res) => {
   const shortURL = req.params.id;
 
   if(!urlsForUser(urlDatabase, user, shortURL)) {
-    return res.send('Unauthorized action' )
+    return res.send('<h4><a href="/urls">nauthorized action, please choose proper url</a></h4>' )
   };
  
-  urlDatabase[req.params.id].longURL = req.body.longURL;// get shorturl/id from url bar & editted longUrl from browser and update the db
+  urlDatabase[req.params.id].longURL = `http://${req.body.longURL}`;// get shorturl/id from url bar & editted longUrl from browser and update the db
   res.redirect('/urls');
 })
 
@@ -179,7 +185,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
 
   if(!urlsForUser(urlDatabase, user, shortURL)) {
-    return res.send('Unauthorized action' )
+    return res.send('<h4><a href="/urls">nauthorized action, please choose proper url</a></h4>' )
   };
    
   delete urlDatabase[shortURL];
@@ -205,7 +211,7 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: longURL,
     user:usersDb[user_id],
   };
-  
+
   res.render("urls_show", templateVars);
 });
 
