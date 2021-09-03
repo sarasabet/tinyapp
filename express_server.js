@@ -15,6 +15,14 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+// this midlewareprotect all pages againt not login user having access to them
+app.use((req, res, next) => {
+  const user_id = req.session.user_id;
+  if(req.path === "/login" || req.path ==="/register" || user_id) {
+    return next();
+  }
+  return res.redirect('/login');
+})
 
 const urlDatabase = {
   b6UTxQ: {
@@ -41,6 +49,8 @@ const usersDb = {
   },
 
 };
+
+
 
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
@@ -108,9 +118,6 @@ app.post('/logout', (req, res) => {
 //drive to urls/new pag, affter pushing submit btn the data will be posted
 app.get("/urls/new", (req, res) => {
   const user_id = req.session["user_id"];
-  if (!user_id) {// if user is not logged in , tthe cookie is undefines , display the login page
-    return res.redirect("/login");
-  }
   const templateVars = {
     user: usersDb[user_id],
   };
@@ -132,9 +139,6 @@ app.post("/urls/new", (req, res) => {
 //get post routs for editing an existing url
 app.get('/urls/:id', (req, res) => {
   const user_id = req.session.user_id
-  if (!user_id) {
-    return res.redirect('/login')
-  }
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
   const longURL = urlDatabase[shortURL].longURL;// get associate lonngurl based on the key/id/shorturl
   const templateVars = {
@@ -175,9 +179,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const user_id = req.session.user_id
-  if (!user_id) {
-    return res.redirect('/login')
-  }
   const shorturl = req.params.shortURL;// save the shorturl comming from the url bar
   const longURL = urlDatabase[shorturl].longURL; // lookup tthe value coresponding shorturl-key
   res.redirect(longURL);// redirect to the related long url
@@ -187,9 +188,6 @@ app.get("/u/:shortURL", (req, res) => {
 // shorturl is the key in db, get the longurl with the key,
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.session.user_id
-  if (!user_id) {
-    return res.redirect('/login')
-  }
   const shortURL = req.params.shortURL; // to define 
   const longURL = urlDatabase[shortURL].longURL;
 
@@ -205,10 +203,6 @@ app.get("/urls/:shortURL", (req, res) => {
 // shows all urls on main page
 app.get("/urls", (req, res) => {
   const user_id = req.session["user_id"];
-  if (!user_id) {
-    return res.redirect('/login');
-  }
-
   const templateVars = {
     user: usersDb[user_id],
     urls: urlDatabase,
@@ -217,14 +211,19 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
+
 app.get("/", (req, res) => {
-  const user_id = req.session.user_id
-  if (!user_id) {
-    return res.redirect('/login')
-  }
   return res.redirect("/urls");
 });
 
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
+
+// app.get("/urls.json", (req, res) => {
+//   res.json(usersDb);
+// });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
