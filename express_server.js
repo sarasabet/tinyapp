@@ -35,7 +35,6 @@ const urlDatabase = {
   }
 };
 
-
 const usersDb = {
   "xJ48lW": {
     id: "xJ48lW",
@@ -47,10 +46,7 @@ const usersDb = {
     email: "2@gmail.com",
     password: "$2b$10$chU0Eqy0Ho.noGFacMU/r.WOUDd5iao4oRcnScutP/lbRyWF8PpNq"// actual pass 000
   },
-
 };
-
-
 
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
@@ -60,6 +56,7 @@ app.get("/register", (req, res) => {
 
   res.render("register", templateVars);
 });
+
 // extract email/pass from browser /register page 
 //if the email does not exist, update users db with the newlly registered user
 app.post("/register", (req, res) => {
@@ -70,17 +67,14 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     return res.render("<h4><p style='text-align: center;'><a href='/register'>Emial/password field can not be empty!</a></p></h4>");
   }
-
   if (user) {
     res.send("<h4><p style='text-align: center;'><a href='/login'>Emial already exist!</a></p></h4>");
   }
-
   usersDb[id] = {
     id,
     email,
     password: bcrypt.hashSync(password, saltRounds)
   };
-
   req.session["user_id"] = id;
   res.redirect('/urls',);
 });
@@ -93,6 +87,7 @@ app.get("/login", (req, res) => {
   };
   res.render("login", templateVars);
 });
+
 // get user name from browser login btn/form 
 //if the pass/email is not match => error else login set the cookie
 app.post('/login', (req, res) => {
@@ -105,8 +100,8 @@ app.post('/login', (req, res) => {
   if (user.email !== email || !bcrypt.compareSync(password, user.password)) {
     return res.send("<h4><p style='text-align: center;'><a href='/login'>Emial/password is not match!</a></p></h4>");
   }
-
   req.session.user_id = user.id;
+
   res.redirect("/urls");
 });
 
@@ -149,6 +144,7 @@ app.get('/urls/:id', (req, res) => {
 
   res.render('urls_show', templateVars);
 });
+
 app.post('/urls/:id', (req, res) => {
   const user_id = req.session["user_id"];
   const user = usersDb[user_id];
@@ -157,7 +153,6 @@ app.post('/urls/:id', (req, res) => {
   if (!urlsForUser(urlDatabase, user, shortURL)) {
     return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
   }
-
   urlDatabase[req.params.id].longURL = `http://${req.body.longURL}`;// get shorturl/id from url bar & editted longUrl from browser and update the db
   res.redirect('/urls');
 });
@@ -171,16 +166,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   if (!urlsForUser(urlDatabase, user, shortURL)) {
     return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
   }
-
   delete urlDatabase[shortURL];
+  
   res.redirect('/urls');
-
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const user_id = req.session.user_id
   const shorturl = req.params.shortURL;// save the shorturl comming from the url bar
   const longURL = urlDatabase[shorturl].longURL; // lookup tthe value coresponding shorturl-key
+
   res.redirect(longURL);// redirect to the related long url
 });
 
@@ -206,12 +201,10 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     user: usersDb[user_id],
     urls: urlDatabase,
-
   };
+
   res.render("urls_index", templateVars);
 });
-
-
 
 app.get("/", (req, res) => {
   return res.redirect("/urls");
@@ -226,5 +219,5 @@ app.get("/", (req, res) => {
 // });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tinyapp listening on port ${PORT}!`);
 });
