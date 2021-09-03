@@ -18,11 +18,11 @@ app.use(cookieSession({
 // this midlewareprotect all pages againt not login user having access to them
 app.use((req, res, next) => {
   const user_id = req.session.user_id;
-  if(req.path === "/login" || req.path ==="/register" || user_id) {
+  if (req.path === "/login" || req.path === "/register" || user_id) {
     return next();
   }
   return res.redirect('/login');
-})
+});
 
 const urlDatabase = {
   b6UTxQ: {
@@ -133,7 +133,7 @@ app.post("/urls/new", (req, res) => {
 
 //get post routs for editing an existing url
 app.get('/urls/:id', (req, res) => {
-  const user_id = req.session.user_id
+  const user_id = req.session.user_id;
   const user = usersDb[user_id];
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
   const longURL = urlDatabase[shortURL].longURL;// get associate lonngurl based on the key/id/shorturl
@@ -172,12 +172,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
   }
   delete urlDatabase[shortURL];
-  
+
   res.redirect('/urls');
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const user_id = req.session.user_id
   const shorturl = req.params.shortURL;// save the shorturl comming from the url bar
   const longURL = urlDatabase[shorturl].longURL; // lookup tthe value coresponding shorturl-key
 
@@ -187,7 +186,7 @@ app.get("/u/:shortURL", (req, res) => {
 // get short url from url , save it as a var  shorturl,
 // shorturl is the key in db, get the longurl with the key,
 app.get("/urls/:shortURL", (req, res) => {
-  const user_id = req.session.user_id
+  const user_id = req.session.user_id;
   const shortURL = req.params.shortURL; // to define 
   const longURL = urlDatabase[shortURL].longURL;
 
@@ -215,14 +214,6 @@ app.get("/urls", (req, res) => {
 app.get("/", (req, res) => {
   return res.redirect("/urls");
 });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(usersDb);
-// });
 
 app.listen(PORT, () => {
   console.log(`Tinyapp listening on port ${PORT}!`);
