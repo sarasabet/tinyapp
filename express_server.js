@@ -217,19 +217,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// app.use((req, res, next) => {
-//   const user_id = req.session.user_id
-//   console.log(req.path)
-//   if(path.request ==='/register') {
-//     return next()
-//   }
-
-//   if(req.path === "/login" || req.path ==="/urls/new" || user_id) {
-//     return next()
-//   }
-//   res.redirect('/login')
-// })
-
 app.get("/", (req, res) => {
   const user_id = req.session.user_id
   if (!user_id) {
@@ -238,13 +225,6 @@ app.get("/", (req, res) => {
   return res.redirect("/urls");
 });
 
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(usersDb);
-// });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
