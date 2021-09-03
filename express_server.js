@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const { generateRandomString, getUserByEmail, urlsForUser } = require("./helpers");
+const { generateRandomString, getUserByEmail, isUrlForUSer, urlsForAUser } = require("./helpers");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -65,7 +65,7 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const user = getUserByEmail(usersDb, email);
   if (!email || !password) {
-    return res.render("<h4><p style='text-align: center;'><a href='/register'>Emial/password field can not be empty!</a></p></h4>");
+    return res.send("<h4><p style='text-align: center;'><a href='/register'>Emial/password field can not be empty!</a></p></h4>");
   }
   if (user) {
     res.send("<h4><p style='text-align: center;'><a href='/login'>Emial already exist!</a></p></h4>");
@@ -134,8 +134,13 @@ app.post("/urls/new", (req, res) => {
 //get post routs for editing an existing url
 app.get('/urls/:id', (req, res) => {
   const user_id = req.session.user_id
+  const user = usersDb[user_id];
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
   const longURL = urlDatabase[shortURL].longURL;// get associate lonngurl based on the key/id/shorturl
+
+  if (!isUrlForUSer(urlDatabase, user, shortURL)) {
+    return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
+  }
   const templateVars = {
     longURL: longURL,
     shortURL: shortURL,
@@ -150,7 +155,7 @@ app.post('/urls/:id', (req, res) => {
   const user = usersDb[user_id];
   const shortURL = req.params.id;
 
-  if (!urlsForUser(urlDatabase, user, shortURL)) {
+  if (!isUrlForUSer(urlDatabase, user, shortURL)) {
     return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
   }
   urlDatabase[req.params.id].longURL = `http://${req.body.longURL}`;// get shorturl/id from url bar & editted longUrl from browser and update the db
@@ -163,7 +168,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const user = usersDb[user_id];
   const shortURL = req.params.shortURL;
 
-  if (!urlsForUser(urlDatabase, user, shortURL)) {
+  if (!isUrlForUSer(urlDatabase, user, shortURL)) {
     return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
   }
   delete urlDatabase[shortURL];
@@ -198,9 +203,10 @@ app.get("/urls/:shortURL", (req, res) => {
 // shows all urls on main page
 app.get("/urls", (req, res) => {
   const user_id = req.session["user_id"];
+
   const templateVars = {
     user: usersDb[user_id],
-    urls: urlDatabase,
+    urls: urlsForAUser(urlDatabase, user_id),
   };
 
   res.render("urls_index", templateVars);

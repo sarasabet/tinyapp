@@ -12,7 +12,7 @@ const getUserByEmail = (usersDb, email) => {
   return false;
 };
 
-const urlsForUser = (urlDatabase, userObj, shortURL) => {
+const isUrlForUSer = (urlDatabase, userObj, shortURL) => {
 
   let userID = urlDatabase[shortURL].userID;
   if (userID === userObj.id) {
@@ -22,9 +22,20 @@ const urlsForUser = (urlDatabase, userObj, shortURL) => {
   }
 };
 
+const urlsForAUser = (urlDatabase, user_id) => {
+  let urlObj = {};
+  for ( let url in urlDatabase) {
+    if (user_id === urlDatabase[url].userID) {
+      urlObj[url] =  urlDatabase[url];
+    }
+  }
+  return urlObj;
+}
+
 module.exports = {
   generateRandomString,
   getUserByEmail,
-  urlsForUser,
+  isUrlForUSer,
+  urlsForAUser
 
 };

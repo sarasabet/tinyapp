@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getUserByEmail , urlsForUser} = require('../helpers.js');
+const { getUserByEmail ,isUrlForUSer} = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -47,15 +47,15 @@ describe('getUserByEmail', function() {
 });
 
 
-describe('urlsForUser', function () {
+describe('isUrlForUSer', function () {
   it ("Should return true ", function(){
-    const result = urlsForUser(urlDatabase, testUsers["userRandomID"],"b6UTxQ" );
+    const result = isUrlForUSer(urlDatabase, testUsers["userRandomID"],"b6UTxQ" );
     const expectedOutput = true
     assert.equal(expectedOutput, result)
   })
 
   it ("Should return true ", function(){
-    const result = urlsForUser(urlDatabase, "userRan","b6UTxQ" );
+    const result = isUrlForUSer(urlDatabase, "userRan","b6UTxQ" );
     const expectedOutput = false
     assert.equal(expectedOutput, result)
   })
