@@ -48,6 +48,9 @@ const usersDb = {
 
 //get post to render the register page and extract data , drive user to main page /urls
 app.get("/register", (req, res) => {
+  if(req.session["user_id"]) {
+    return res.redirect("/urls")
+  }
   const templateVars = {
     user: undefined,
   };
@@ -79,7 +82,11 @@ app.post("/register", (req, res) => {
 
 // if user click on login btn drives the user to login page 
 app.get("/login", (req, res) => {
+  if(req.session["user_id"]) {
+    return res.redirect("/urls")
+  }
   req.session = null;
+
   const templateVars = {
     user: undefined,
   };
@@ -134,6 +141,9 @@ app.get('/urls/:id', (req, res) => {
   const user_id = req.session.user_id;
   const user = usersDb[user_id];
   const shortURL = req.params.id;//get id/shortUrl from teh url bar
+  if (!urlDatabase[shortURL]) {
+    return res.send("<h4><p style='text-align: center;'><a href='/urls'>please choose proper url</a></p></h4>");
+  }
   const longURL = urlDatabase[shortURL].longURL;// get associate lonngurl based on the key/id/shorturl
 
   if (!isUrlForUSer(urlDatabase, user, shortURL)) {
