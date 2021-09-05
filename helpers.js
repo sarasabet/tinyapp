@@ -24,7 +24,7 @@ const isUrlForUSer = (urlDatabase, userObj, shortURL) => {
 
 const urlsForAUser = (urlDatabase, user_id) => {
   let urlObj = {};
-  for ( let url in urlDatabase) {
+  for ( const url in urlDatabase) {
     if (user_id === urlDatabase[url].userID) {
       urlObj[url] =  urlDatabase[url];
     }

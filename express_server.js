@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -10,7 +9,6 @@ const { generateRandomString, getUserByEmail, isUrlForUSer, urlsForAUser } = req
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -139,7 +137,7 @@ app.get('/urls/:id', (req, res) => {
   const longURL = urlDatabase[shortURL].longURL;// get associate lonngurl based on the key/id/shorturl
 
   if (!isUrlForUSer(urlDatabase, user, shortURL)) {
-    return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
+    return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper url</a></p></h4>");
   }
   const templateVars = {
     longURL: longURL,
@@ -158,7 +156,7 @@ app.post('/urls/:id', (req, res) => {
   if (!isUrlForUSer(urlDatabase, user, shortURL)) {
     return res.send("<h4><p style='text-align: center;'><a href='/urls'>Unauthorized action, please choose proper ur</a></p></h4>");
   }
-  urlDatabase[req.params.id].longURL = `http://${req.body.longURL}`;// get shorturl/id from url bar & editted longUrl from browser and update the db
+  urlDatabase[req.params.id].longURL = `${req.body.longURL}`;// get shorturl/id from url bar & editted longUrl from browser and update the db
   res.redirect('/urls');
 });
 
