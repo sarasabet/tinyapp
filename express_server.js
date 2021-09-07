@@ -130,7 +130,7 @@ app.post("/urls/new", (req, res) => {
   const user_id = req.session["user_id"];
 
   urlDatabase[shortURL] = {
-    longURL: `http://${longURL}`,// update db with new short/long urls
+    longURL: `${longURL}`,// update db with new short/long urls
     userID: user_id,
   };
   res.redirect("/urls");
@@ -186,7 +186,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shorturl = req.params.shortURL;// save the shorturl comming from the url bar
+  const shortUrls = Object.keys(urlDatabase);
+  if ((!shortUrls.includes(shorturl))) {
+    return res.send("<h4><p style='text-align: center;'><a href='/urls'>NOt a valid Url</a></p></h4>");
+  }
   const longURL = urlDatabase[shorturl].longURL; // lookup tthe value coresponding shorturl-key
+
 
   res.redirect(longURL);// redirect to the related long url
 });
